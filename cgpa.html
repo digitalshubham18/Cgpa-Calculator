@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGPA Tracker — Clean &amp; Simple</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&family=Fraunces:opsz,wght@9..144,500..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F5FC;
+    --surface:#FFFFFF;
+    --surface-2:#FAFAFE;
+    --border:#E8E7F5;
+    --border-soft:#EFEEFA;
+    --text:#1B1B2E;
+    --text-muted:#666B85;
+    --text-faint:#9C9FB8;
+    --primary:#6D5DF6;
+    --primary-2:#9D4EDD;
+    --primary-3:#EC4899;
+    --primary-soft:#F1EEFE;
+    --primary-dark:#5A4AE0;
+    --grad: linear-gradient(120deg, var(--primary) 0%, var(--primary-2) 55%, var(--primary-3) 100%);
+    --success:#15803D;
+    --success-soft:#E9F8EE;
+    --warning:#B45309;
+    --warning-soft:#FFF6E5;
+    --danger:#DC2626;
+    --danger-soft:#FDEAEA;
+    --teal:#0D9488;
+    --teal-soft:#E6F7F5;
+    --amber:#D97706;
+    --radius-lg:18px;
+    --radius-md:13px;
+    --radius-sm:9px;
+    --shadow-sm: 0 1px 2px rgba(30,20,80,0.04), 0 1px 1px rgba(30,20,80,0.03);
+    --shadow-md: 0 2px 6px rgba(40,20,90,0.05), 0 10px 24px rgba(40,20,90,0.08);
+    --shadow-lg: 0 4px 12px rgba(40,20,90,0.08), 0 20px 48px rgba(40,20,90,0.14);
+    --shadow-glow: 0 4px 12px rgba(109,93,246,0.18), 0 10px 28px rgba(109,93,246,0.22);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(620px circle at 8% -6%, rgba(109,93,246,0.14), transparent 60%),
+      radial-gradient(560px circle at 100% 0%, rgba(236,72,153,0.10), transparent 55%),
+      radial-gradient(700px circle at 30% 100%, rgba(13,148,136,0.07), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    position:relative;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.025; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .app{ position:relative; z-index:1; }
+  h1,h2,h3{ font-family:'Inter Tight','Inter',sans-serif; }
+  button{ font-family:inherit; cursor:pointer; }
+  ::selection{ background:var(--primary-soft); }
+  button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible{
+    outline:2px solid var(--primary); outline-offset:2px;
+  }
+
+  .app{ display:flex; min-height:100vh; }
+  .sidebar{
+    width:248px; flex-shrink:0; background:rgba(255,255,255,0.85); backdrop-filter:blur(8px);
+    border-right:1px solid var(--border); padding:24px 16px; display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 28px; }
+  .brand-mark{
+    width:36px; height:36px; border-radius:11px; background:var(--grad);
+    display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:16px;
+    flex-shrink:0; box-shadow:var(--shadow-glow);
+  }
+  .brand-text{ font-weight:800; font-size:16px; letter-spacing:-0.01em; }
+  .brand-sub{ font-size:11.5px; color:var(--text-faint); margin-top:1px; }
+
+  nav.sidenav{ display:flex; flex-direction:column; gap:3px; }
+  nav.sidenav button{
+    display:flex; align-items:center; gap:11px; text-align:left; width:100%;
+    background:transparent; border:none; border-radius:var(--radius-sm);
+    padding:10px 12px; font-size:14px; font-weight:500; color:var(--text-muted);
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+    position:relative;
+  }
+  nav.sidenav button svg{ width:18px; height:18px; flex-shrink:0; opacity:0.85; }
+  nav.sidenav button:hover{ background:var(--surface-2); color:var(--text); transform:translateX(1px); }
+  nav.sidenav button.active{
+    background:var(--primary-soft); color:var(--primary-dark); font-weight:700;
+  }
+  nav.sidenav button.active::before{
+    content:""; position:absolute; left:-16px; top:8px; bottom:8px; width:3px; border-radius:3px;
+    background:var(--grad);
+  }
+
+  .sidebar-summary{
+    margin-top:auto; background:var(--grad); border-radius:var(--radius-md);
+    padding:18px; box-shadow:var(--shadow-glow); position:relative; overflow:hidden;
+  }
+  .sidebar-summary::after{
+    content:""; position:absolute; right:-20px; bottom:-20px; width:90px; height:90px; border-radius:50%;
+    background:rgba(255,255,255,0.14);
+  }
+  .sidebar-summary .lbl{ font-size:11px; color:rgba(255,255,255,0.8); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; position:relative;}
+  .sidebar-summary .val{ font-family:'Fraunces', serif; font-size:30px; font-weight:600; color:#fff; line-height:1; position:relative; }
+  .sidebar-summary .meta{ font-size:12px; color:rgba(255,255,255,0.85); margin-top:6px; position:relative; }
+
+  .main{ flex:1; min-width:0; }
+  .topbar{
+    background:rgba(255,255,255,0.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--border);
+    padding:18px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px;
+    position:sticky; top:0; z-index:5;
+  }
+  .topbar h1{
+    font-size:20px; margin:0; font-weight:800; letter-spacing:-0.01em;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+    display:inline-block;
+  }
+  .topbar p{ margin:3px 0 0; font-size:13px; color:var(--text-muted); }
+  .mobile-tabs{ display:none; }
+
+  .content{ padding:28px 32px 60px; max-width:980px; }
+  .panel{ display:none; animation: fadeIn .2s ease; }
+  .panel.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .page-head{ margin-bottom:22px; }
+  .page-head h2{ font-size:22px; margin:0 0 4px; font-weight:700; letter-spacing:-0.01em; }
+  .page-head p{ margin:0; color:var(--text-muted); font-size:14px; line-height:1.5; max-width:560px; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm); transition: box-shadow .2s ease, transform .2s ease;
+  }
+
+  .banner{
+    display:none; align-items:center; gap:10px; background:linear-gradient(120deg, var(--success-soft), #DDF7E6);
+    color:var(--success); border:1px solid #BFE9CB; border-radius:var(--radius-md); padding:13px 16px;
+    font-size:13.5px; font-weight:700; margin-bottom:18px;
+  }
+  .banner.show{ display:flex; animation: slideDown .3s ease; }
+  @keyframes slideDown{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+
+
+  .semester-card{ margin-bottom:18px; overflow:hidden; border-left:4px solid var(--primary); transition: transform .2s ease, box-shadow .2s ease; }
+  .semester-card:hover{ box-shadow:var(--shadow-md); }
+  .semester-card:nth-of-type(5n+2){ border-left-color:var(--primary-3); }
+  .semester-card:nth-of-type(5n+3){ border-left-color:var(--teal); }
+  .semester-card:nth-of-type(5n+4){ border-left-color:var(--amber); }
+  .semester-card:nth-of-type(5n+5){ border-left-color:var(--primary-2); }
+  .semester-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding:16px 20px; border-bottom:1px solid var(--border-soft);
+  }
+  .semester-head-left{ display:flex; align-items:center; gap:10px; flex:1; min-width:180px; }
+  .semester-head input[type="text"]{
+    border:none; background:transparent; font-weight:700; font-size:15px; color:var(--text);
+    padding:6px 8px; border-radius:6px; width:180px; transition: background .15s ease;
+  }
+  .semester-head input[type="text"]:hover, .semester-head input[type="text"]:focus{ background:var(--surface-2); }
+  .pill{
+    font-size:12px; font-weight:700; padding:5px 11px; border-radius:999px; background:var(--grad);
+    color:white; white-space:nowrap; box-shadow:0 3px 10px rgba(109,93,246,0.25);
+  }
+  .text-btn{
+    background:transparent; border:none; color:var(--text-faint); font-size:12.5px; font-weight:500;
+    padding:6px 10px; border-radius:var(--radius-sm); display:flex; align-items:center; gap:6px;
+  }
+  .text-btn:hover{ color:var(--danger); background:var(--danger-soft); }
+  .text-btn svg{ width:14px; height:14px; }
+
+  .subjects{ padding:6px 20px 16px; }
+  .subject-row{
+    display:grid; grid-template-columns: 1.6fr 0.7fr 1.1fr 0.8fr 36px; gap:10px; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--border-soft);
+  }
+  .subject-row:last-of-type{ border-bottom:none; }
+  .col-label{
+    display:none; font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; font-weight:600;
+  }
+  .subjects-head{
+    display:grid; grid-template-columns: 1.6fr 0.7fr 1.1fr 0.8fr 36px; gap:10px;
+    padding:0 0 8px; margin-top:4px;
+  }
+  .subjects-head span{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; font-weight:600; }
+
+  input[type="text"].field-input, input[type="number"].field-input, select.field-input{
+    width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); font-size:13.5px; padding:9px 10px; font-family:inherit;
+  }
+  input.field-input:focus, select.field-input:focus{ background:var(--surface); border-color:var(--primary); box-shadow:0 0 0 3px rgba(109,93,246,0.12); }
+
+  .input-toggle{ display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; }
+  .input-toggle button{
+    flex:1; background:transparent; border:none; font-size:12px; font-weight:600; color:var(--text-faint);
+    padding:7px 6px; border-radius:6px; transition: all .15s ease;
+  }
+  .input-toggle button.active{ background:var(--grad); color:#fff; box-shadow:var(--shadow-sm); }
+
+  .grade-badge{
+    display:inline-flex; align-items:center; justify-content:center; min-width:38px; height:30px; padding:0 9px;
+    border-radius:999px; font-weight:800; font-size:12.5px; border:1.5px solid currentColor;
+  }
+  .rm-btn{
+    background:transparent; border:none; color:var(--text-faint); width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .rm-btn:hover{ background:var(--danger-soft); color:var(--danger); }
+  .rm-btn svg{ width:16px; height:16px; }
+
+  .add-row-btn{
+    margin-top:10px; display:inline-flex; align-items:center; gap:6px; background:transparent; border:1.5px dashed var(--border);
+    color:var(--text-muted); font-size:13px; font-weight:600; padding:9px 14px; border-radius:var(--radius-sm);
+    transition: all .15s ease;
+  }
+  .add-row-btn:hover{ border-color:var(--primary); border-style:solid; color:var(--primary-dark); background:var(--primary-soft); transform:translateY(-1px); }
+
+  .footer-actions{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:18px; flex-wrap:wrap; }
+  .primary-btn{
+    background:var(--grad); color:white; border:none; font-weight:700; font-size:13.5px;
+    padding:11px 18px; border-radius:var(--radius-md); display:flex; align-items:center; gap:8px;
+    box-shadow:var(--shadow-glow); transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .primary-btn:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(109,93,246,0.35); }
+  .ghost-btn{
+    background:transparent; color:var(--danger); border:1px solid #F3D2D2; font-weight:600; font-size:13px;
+    padding:9px 14px; border-radius:var(--radius-md); transition: all .15s ease;
+  }
+  .ghost-btn:hover{ background:var(--danger-soft); transform:translateY(-1px); }
+  .save-note{ font-size:12px; color:var(--text-faint); margin-top:14px; display:flex; align-items:center; gap:6px; }
+  .save-note svg{ width:13px; height:13px; }
+
+
+  .report-grid{ display:grid; grid-template-columns: 320px 1fr; gap:20px; }
+  @media (max-width:760px){ .report-grid{ grid-template-columns:1fr; } }
+  .stat-card{ padding:30px 28px; text-align:center; }
+  .stat-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
+  .ring-wrap{ position:relative; width:168px; height:168px; margin:0 auto 14px; }
+  .ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .ring-bg{ fill:none; stroke:var(--border-soft); stroke-width:11; }
+  .ring-fg{ fill:none; stroke:url(#ringGradient); stroke-width:11; stroke-linecap:round; transition: stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1); }
+  .ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-center .num{
+    font-family:'Fraunces', serif; font-size:38px; font-weight:600; letter-spacing:-0.01em;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .ring-center .lbl{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.05em; margin-top:2px; }
+
+  .stat-row{ display:flex; justify-content:space-around; margin-top:18px; padding-top:18px; border-top:1px solid var(--border-soft); }
+  .stat-item .n{ font-size:19px; font-weight:800; }
+  .stat-item .l{ font-size:11.5px; color:var(--text-faint); margin-top:2px; }
+
+  .trend-card{ padding:24px; }
+  .trend-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
+  .trend-card h3{ font-size:14px; margin:0 0 16px; font-weight:700; color:var(--text); }
+  .bar-row{ display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+  .bar-row .lbl{ width:110px; font-size:12.5px; color:var(--text-muted); flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bar-track{ flex:1; height:10px; background:var(--border-soft); border-radius:999px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:999px; background:linear-gradient(90deg, var(--primary), #8B85F0); transition:width .5s ease; }
+  .bar-val{ width:40px; text-align:right; font-size:12.5px; font-weight:600; color:var(--text); flex-shrink:0; }
+  .empty-state{ text-align:center; padding:30px 10px; color:var(--text-faint); font-size:13.5px; }
+
+   
+  .planner-grid{ display:grid; grid-template-columns: 320px 1fr; gap:20px; align-items:start; }
+  @media (max-width:760px){ .planner-grid{ grid-template-columns:1fr; } }
+  .planner-card{ padding:24px; }
+  .planner-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
+  .field{ margin-bottom:18px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--text); margin-bottom:6px; }
+  .field .hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; }
+
+  .result-card{ padding:26px; }
+  .result-headline{ font-size:14px; font-weight:600; color:var(--text-muted); margin:0 0 18px; }
+  .step{ display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-soft); font-size:13.5px; color:var(--text-muted); }
+  .step:last-of-type{ border-bottom:none; }
+  .step .step-num{
+    flex-shrink:0; width:22px; height:22px; border-radius:50%; background:var(--grad);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff;
+  }
+  .step b{ color:var(--text); font-weight:700; }
+
+  .verdict-box{
+    margin-top:18px; padding:18px; border-radius:var(--radius-md); display:flex; align-items:center; gap:14px;
+  }
+  .verdict-box.ok{ background:var(--success-soft); border:1px solid #CFEFD8; }
+  .verdict-box.warn{ background:var(--warning-soft); border:1px solid #F5E0B8; }
+  .verdict-box.bad{ background:var(--danger-soft); border:1px solid #F3D2D2; }
+  .verdict-num{ font-family:'Fraunces', serif; font-size:32px; font-weight:600; flex-shrink:0; }
+  .verdict-box.ok .verdict-num{ color:var(--success); }
+  .verdict-box.warn .verdict-num{ color:var(--warning); }
+  .verdict-box.bad .verdict-num{ color:var(--danger); }
+  .verdict-text{ font-size:13px; color:var(--text); line-height:1.5; }
+  .verdict-text b{ font-weight:700; }
+
+  
+  .scale-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:14px; }
+  .scale-tile{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:0; text-align:center; overflow:hidden; box-shadow:var(--shadow-sm);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .scale-tile:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .scale-tile .tile-top{ padding:20px 10px 14px; }
+  .scale-tile .letter{ font-size:32px; font-weight:800; }
+  .scale-tile .marks{ font-size:11.5px; color:var(--text-faint); margin-top:4px; }
+  .scale-tile .tile-bottom{ padding:10px 0; font-size:12px; color:white; font-weight:700; letter-spacing:0.03em; }
+  .scale-tile .pt-num{ font-size:15px; }
+
+  footer.app-footer{ text-align:center; padding:10px 0 40px; font-size:12px; color:var(--text-faint); }
+
+ 
+  @media (max-width: 880px){
+    .sidebar{ display:none; }
+    .mobile-tabs{
+      display:flex; gap:4px; background:var(--surface-2); border:1px solid var(--border); border-radius:999px;
+      padding:4px; overflow-x:auto;
+    }
+    .mobile-tabs button{
+      flex-shrink:0; background:transparent; border:none; font-size:12.5px; font-weight:600; color:var(--text-muted);
+      padding:8px 13px; border-radius:999px; white-space:nowrap;
+    }
+    .mobile-tabs button.active{ background:var(--surface); color:var(--primary-dark); box-shadow:var(--shadow-sm); }
+    .topbar{ flex-direction:column; align-items:stretch; gap:12px; padding:14px 16px; }
+    .content{ padding:18px 16px 50px; }
+    .subjects-head{ display:none; }
+    .subject-row{ grid-template-columns:1fr; gap:8px; padding:14px 0; }
+    .col-label{ display:block; }
+    .subject-row > div{ display:flex; flex-direction:column; gap:4px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,15,40,0.42); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .modal-overlay.show{ opacity:1; pointer-events:auto; }
+  .modal-box{
+    background:var(--surface); border-radius:var(--radius-lg); padding:26px; max-width:380px; width:100%;
+    box-shadow:var(--shadow-lg); transform:translateY(10px) scale(0.97); transition:transform .22s cubic-bezier(.2,.9,.3,1.1);
+  }
+  .modal-overlay.show .modal-box{ transform:translateY(0) scale(1); }
+  .modal-icon{
+    width:44px; height:44px; border-radius:12px; background:var(--danger-soft); color:var(--danger);
+    display:flex; align-items:center; justify-content:center; margin-bottom:14px;
+  }
+  .modal-icon svg{ width:22px; height:22px; }
+  .modal-box h3{ font-size:16.5px; margin:0 0 6px; font-weight:700; }
+  .modal-box p{ font-size:13.5px; color:var(--text-muted); margin:0 0 20px; line-height:1.5; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+  .modal-actions button{ font-size:13.5px; font-weight:600; padding:9px 16px; border-radius:var(--radius-sm); border:none; }
+  .modal-cancel{ background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border) !important; }
+  .modal-cancel:hover{ background:var(--border-soft); }
+  .modal-confirm{ background:var(--danger); color:#fff; }
+  .modal-confirm:hover{ background:#C81E1E; }
+
+  
+  .toast-stack{ position:fixed; bottom:22px; right:22px; z-index:110; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+  .toast{
+    background:#1B1B2E; color:#fff; padding:12px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:500;
+    box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:12px; max-width:320px;
+    transform:translateY(8px) scale(0.97); opacity:0; transition:all .25s cubic-bezier(.2,.9,.3,1.1);
+  }
+  .toast.show{ transform:translateY(0) scale(1); opacity:1; }
+  .toast .toast-dot{ width:7px; height:7px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .toast.danger .toast-dot{ background:var(--primary-3); }
+  .toast-undo{ background:transparent; border:none; color:#C9C4FF; font-weight:700; font-size:12.5px; flex-shrink:0; padding:2px; }
+  .toast-undo:hover{ color:#fff; }
+
+ 
+  .empty-card{
+    text-align:center; padding:44px 24px; border:1.5px dashed var(--border); border-radius:var(--radius-lg);
+    background:var(--surface-2);
+  }
+  .empty-card .e-icon{
+    width:52px; height:52px; border-radius:14px; background:var(--primary-soft); color:var(--primary);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
+  }
+  .empty-card .e-icon svg{ width:24px; height:24px; }
+  .empty-card h4{ font-size:15px; margin:0 0 4px; font-weight:700; }
+  .empty-card p{ font-size:13px; color:var(--text-muted); margin:0 0 16px; }
+  .empty-subjects{ padding:22px 10px; text-align:center; color:var(--text-faint); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">G</div>
+      <div>
+        <div class="brand-text">CGPA Tracker</div>
+        <div class="brand-sub">Plan your semesters</div>
+      </div>
+    </div>
+    <nav class="sidenav">
+      <button data-tab="ledger" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Semesters
+      </button>
+      <button data-tab="report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+        Report Card
+      </button>
+      <button data-tab="planner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Target Planner
+      </button>
+      <button data-tab="scale">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
+        Grade Scale
+      </button>
+    </nav>
+    <div class="sidebar-summary">
+      <div class="lbl">Current CGPA</div>
+      <div class="val" id="sideCgpa">0.00</div>
+      <div class="meta" id="sideMeta">0 credits · 0 semesters</div>
+    </div>
+  </aside>
+
+  
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="topTitle">Semesters</h1>
+        <p id="topSub">Add each semester's subjects to build your full academic record.</p>
+      </div>
+      <div class="mobile-tabs">
+        <button data-tab="ledger" class="active">Semesters</button>
+        <button data-tab="report">Report Card</button>
+        <button data-tab="planner">Planner</button>
+        <button data-tab="scale">Scale</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+     
+      <div class="panel active" id="panel-ledger">
+        <div class="banner" id="banner">🎉 &nbsp;Excellent work — your CGPA just crossed 9.0!</div>
+        <div id="semesterList"></div>
+        <button class="add-row-btn" id="addSemesterBtn" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          Add a semester
+        </button>
+        <div class="footer-actions">
+          <span class="save-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            <span id="saveNote">Your entries are saved automatically</span>
+          </span>
+          <button class="ghost-btn" id="eraseBtn" type="button">Clear all data</button>
+        </div>
+      </div>
+
+      
+      <div class="panel" id="panel-report">
+        <div class="report-grid">
+          <div class="card stat-card">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#6D5DF6"/>
+                    <stop offset="55%" stop-color="#9D4EDD"/>
+                    <stop offset="100%" stop-color="#EC4899"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-bg" cx="80" cy="80" r="70"/>
+                <circle class="ring-fg" id="ringFg" cx="80" cy="80" r="70" stroke-dasharray="440" stroke-dashoffset="440"/>
+              </svg>
+              <div class="ring-center">
+                <div class="num" id="cgpaNum">0.00</div>
+                <div class="lbl">CGPA</div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-item"><div class="n" id="totalCredits">0</div><div class="l">Credits</div></div>
+              <div class="stat-item"><div class="n" id="totalSemesters">0</div><div class="l">Semesters</div></div>
+              <div class="stat-item"><div class="n" id="totalSubjects">0</div><div class="l">Subjects</div></div>
+            </div>
+          </div>
+          <div class="card trend-card">
+            <h3>SGPA by semester</h3>
+            <div id="trendBars"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-planner">
+        <div class="planner-grid">
+          <div class="card planner-card">
+            <div class="field">
+              <label for="targetCgpa">Target CGPA</label>
+              <input class="field-input" type="number" id="targetCgpa" step="0.01" min="0" max="10" placeholder="e.g. 8.50">
+              <div class="hint">The CGPA you're aiming to finish with.</div>
+            </div>
+            <div class="field">
+              <label for="remainingCredits">Credits remaining</label>
+              <input class="field-input" type="number" id="remainingCredits" step="1" min="0" placeholder="e.g. 20">
+              <div class="hint">Total credits in the semesters you haven't completed yet.</div>
+            </div>
+            <div class="hint">This uses the totals from your <b>Semesters</b> tab automatically.</div>
+          </div>
+          <div class="card result-card" id="resultCard"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-scale">
+        <div class="scale-grid" id="scaleGrid"></div>
+      </div>
+       <footer class="app-footer">CGPA Tracker © 2026 | Designed & Developed by Shubham Kumar
+</footer>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.86 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.86a2 2 0 0 0-3.4 0z"/></svg>
+    </div>
+    <h3 id="modalTitle">Clear all data?</h3>
+    <p id="modalMessage">This removes every semester and subject you've entered. This can't be undone.</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="modalCancel" type="button">Cancel</button>
+      <button class="modal-confirm" id="modalConfirm" type="button">Clear everything</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+
+<script>
+(function(){
+  const GRADES = [
+    {g:'O',  min:90, max:100, pt:10, color:'#15803D', soft:'#EAF7EE'},
+    {g:'A+', min:80, max:89,  pt:9,  color:'#1D4ED8', soft:'#EAF1FE'},
+    {g:'A',  min:70, max:79,  pt:8,  color:'#1D4ED8', soft:'#EAF1FE'},
+    {g:'B+', min:60, max:69,  pt:7,  color:'#B45309', soft:'#FFF6E8'},
+    {g:'B',  min:50, max:59,  pt:6,  color:'#B45309', soft:'#FFF6E8'},
+    {g:'C',  min:40, max:49,  pt:5,  color:'#DC2626', soft:'#FDEDED'},
+    {g:'E',  min:0,  max:39,  pt:0,  color:'#DC2626', soft:'#FDEDED'},
+  ];
+
+  function gradeInfo(g){ return GRADES.find(x=>x.g===g) || GRADES[GRADES.length-1]; }
+  function gradeFromMarks(m){
+    m = Math.max(0, Math.min(100, Number(m)||0));
+    for(const r of GRADES){ if(m>=r.min && m<=r.max) return r.g; }
+    return 'E';
+  }
+  function ptFromGrade(g){ return gradeInfo(g).pt; }
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const modalConfirm = document.getElementById('modalConfirm');
+  const modalCancel = document.getElementById('modalCancel');
+  let modalResolve = null;
+  function askConfirm(title, message, confirmLabel){
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modalConfirm.textContent = confirmLabel || 'Confirm';
+    modalOverlay.classList.add('show');
+    return new Promise(resolve=>{ modalResolve = resolve; });
+  }
+  function closeModal(result){
+    modalOverlay.classList.remove('show');
+    if(modalResolve){ modalResolve(result); modalResolve = null; }
+  }
+  modalConfirm.addEventListener('click', ()=> closeModal(true));
+  modalCancel.addEventListener('click', ()=> closeModal(false));
+  modalOverlay.addEventListener('click', (e)=>{ if(e.target===modalOverlay) closeModal(false); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modalOverlay.classList.contains('show')) closeModal(false); });
+
+
+  const toastStack = document.getElementById('toastStack');
+  function showToast(message, opts){
+    opts = opts || {};
+    const el = document.createElement('div');
+    el.className = 'toast' + (opts.danger ? ' danger' : '');
+    el.innerHTML = `<span class="toast-dot"></span><span>${escapeHtml(message)}</span>`;
+    if(opts.onUndo){
+      const btn = document.createElement('button');
+      btn.className = 'toast-undo';
+      btn.type = 'button';
+      btn.textContent = 'Undo';
+      btn.addEventListener('click', ()=>{ opts.onUndo(); el.remove(); });
+      el.appendChild(btn);
+    }
+    toastStack.appendChild(el);
+    requestAnimationFrame(()=> el.classList.add('show'));
+    setTimeout(()=>{
+      el.classList.remove('show');
+      setTimeout(()=> el.remove(), 250);
+    }, opts.duration || 4000);
+  }
+
+  let state = {
+    semesters: [
+      { id: uid(), name:'Semester 1', subjects:[
+        { id: uid(), name:'', credits:4, mode:'marks', marks:85, grade:'A+' }
+      ]}
+    ]
+  };
+
+ 
+  const saveNote = document.getElementById('saveNote');
+  async function saveState(){
+    try{
+      await window.storage.set('cgpa:semesters', JSON.stringify(state.semesters));
+      saveNote.textContent = 'Your entries are saved automatically';
+    }catch(e){
+      saveNote.textContent = "Couldn't save — entries may reset on reload";
+    }
+  }
+  async function loadState(){
+    try{
+      const res = await window.storage.get('cgpa:semesters');
+      if(res && res.value){
+        const parsed = JSON.parse(res.value);
+        if(Array.isArray(parsed) && parsed.length){ state.semesters = parsed; }
+      }
+    }catch(e){  }
+    renderAll();
+  }
+
+  
+  const titles = {
+    ledger: ['Semesters', "Add each semester's subjects to build your full academic record."],
+    report: ['Report Card', 'Your overall CGPA and how each semester compares.'],
+    planner: ['Target Planner', 'Find out what GPA you need from here to hit your goal.'],
+    scale: ['Grade Scale', 'How marks convert into grade points.']
+  };
+  function setTab(tab){
+    document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+tab).classList.add('active');
+    document.getElementById('topTitle').textContent = titles[tab][0];
+    document.getElementById('topSub').textContent = titles[tab][1];
+    if(tab==='planner') renderPlanner();
+    if(tab==='report') renderReport();
+  }
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click', ()=> setTab(btn.dataset.tab));
+  });
+
+  
+  function subjectPoint(sub){
+    const g = sub.mode==='marks' ? gradeFromMarks(sub.marks) : sub.grade;
+    return { grade: g, pt: ptFromGrade(g) };
+  }
+  function semesterStats(sem){
+    let credits=0, points=0;
+    sem.subjects.forEach(s=>{
+      const c = Number(s.credits)||0;
+      const {pt} = subjectPoint(s);
+      credits += c; points += c*pt;
+    });
+    return {credits, points, sgpa: credits>0 ? points/credits : 0};
+  }
+  function overallStats(){
+    let credits=0, points=0, subjects=0;
+    state.semesters.forEach(sem=>{
+      const st = semesterStats(sem);
+      credits += st.credits; points += st.points; subjects += sem.subjects.length;
+    });
+    return {credits, points, subjects, cgpa: credits>0 ? points/credits : 0};
+  }
+
+  function escapeHtml(str){
+    return String(str==null?'':str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+
+  const semesterList = document.getElementById('semesterList');
+  function blankSubject(){ return {id:uid(), name:'', credits:4, mode:'marks', marks:75, grade:'A'}; }
+
+  function renderLedger(){
+    if(state.semesters.length===0){
+      semesterList.innerHTML = `
+        <div class="empty-card">
+          <div class="e-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <h4>No semesters yet</h4>
+          <p>Add your first semester to start building your record.</p>
+          <button class="primary-btn" id="emptyAddSemesterBtn" type="button" style="margin:0 auto;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Add a semester
+          </button>
+        </div>`;
+      const btn = document.getElementById('emptyAddSemesterBtn');
+      if(btn) btn.addEventListener('click', addSemester);
+      return;
+    }
+
+    semesterList.innerHTML = '';
+    state.semesters.forEach((sem)=>{
+      const st = semesterStats(sem);
+      const card = document.createElement('div');
+      card.className = 'semester-card card';
+      card.dataset.semId = sem.id;
+      card.innerHTML = `
+        <div class="semester-head">
+          <div class="semester-head-left">
+            <input type="text" value="${escapeHtml(sem.name)}" data-action="sem-name" data-sem="${sem.id}" aria-label="Semester name">
+            <span class="pill">SGPA ${st.sgpa.toFixed(2)}</span>
+          </div>
+          <button class="text-btn" data-action="remove-sem" data-sem="${sem.id}" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+            Remove semester
+          </button>
+        </div>
+        <div class="subjects">
+          ${sem.subjects.length===0 ? `
+            <div class="empty-subjects">No subjects in this semester yet.</div>
+          ` : `
+          <div class="subjects-head">
+            <span>Subject</span><span>Credits</span><span>Marks or grade</span><span>Grade point</span><span></span>
+          </div>
+          ${sem.subjects.map(sub=>{
+            const {grade, pt} = subjectPoint(sub);
+            const info = gradeInfo(grade);
+            return `
+            <div class="subject-row">
+              <div>
+                <span class="col-label">Subject</span>
+                <input class="field-input" type="text" placeholder="e.g. Mathematics" value="${escapeHtml(sub.name)}" data-action="sub-name" data-sem="${sem.id}" data-sub="${sub.id}">
+              </div>
+              <div>
+                <span class="col-label">Credits</span>
+                <input class="field-input" type="number" min="0" max="10" value="${sub.credits}" data-action="sub-credits" data-sem="${sem.id}" data-sub="${sub.id}">
+              </div>
+              <div>
+                <span class="col-label">Marks or grade</span>
+                <div style="display:flex; gap:6px;">
+                  <div class="input-toggle" style="flex-shrink:0; width:96px;">
+                    <button data-action="mode" data-mode="marks" data-sem="${sem.id}" data-sub="${sub.id}" type="button" class="${sub.mode==='marks'?'active':''}">Marks</button>
+                    <button data-action="mode" data-mode="grade" data-sem="${sem.id}" data-sub="${sub.id}" type="button" class="${sub.mode==='grade'?'active':''}">Grade</button>
+                  </div>
+                  ${sub.mode==='marks'
+                    ? `<input class="field-input" type="number" min="0" max="100" placeholder="0–100" value="${sub.marks}" data-action="sub-marks" data-sem="${sem.id}" data-sub="${sub.id}">`
+                    : `<select class="field-input" data-action="sub-grade" data-sem="${sem.id}" data-sub="${sub.id}">
+                        ${GRADES.map(r=>`<option value="${r.g}" ${sub.grade===r.g?'selected':''}>${r.g}</option>`).join('')}
+                      </select>`
+                  }
+                </div>
+              </div>
+              <div>
+                <span class="col-label">Grade point</span>
+                <span class="grade-badge" data-sub-id="${sub.id}" style="color:${info.color}; background:${info.soft};">${grade} · ${pt}</span>
+              </div>
+              <div>
+                <button class="rm-btn" data-action="remove-sub" data-sem="${sem.id}" data-sub="${sub.id}" type="button" aria-label="Remove subject">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>`;
+          }).join('')}
+          `}
+          <button class="add-row-btn" data-action="add-sub" data-sem="${sem.id}" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Add subject
+          </button>
+        </div>
+      `;
+      semesterList.appendChild(card);
+    });
+  }
+
+
+  function refreshDerived(semId){
+    const sem = state.semesters.find(s=>s.id===semId);
+    if(!sem) return;
+    const st = semesterStats(sem);
+    const card = semesterList.querySelector(`.semester-card[data-sem-id="${semId}"]`);
+    if(card){
+      const pill = card.querySelector('.pill');
+      if(pill) pill.textContent = `SGPA ${st.sgpa.toFixed(2)}`;
+      sem.subjects.forEach(sub=>{
+        const badge = card.querySelector(`.grade-badge[data-sub-id="${sub.id}"]`);
+        if(!badge) return;
+        const {grade, pt} = subjectPoint(sub);
+        const info = gradeInfo(grade);
+        badge.textContent = `${grade} · ${pt}`;
+        badge.style.color = info.color;
+        badge.style.background = info.soft;
+      });
+    }
+    updateSidebarSummary();
+  }
+
+  function handleFieldChange(e){
+    const t = e.target;
+    const action = t.dataset.action;
+    if(!action) return;
+    const sem = state.semesters.find(s=>s.id===t.dataset.sem);
+    if(!sem) return;
+
+    if(action==='sem-name'){
+      sem.name = t.value;
+      saveState();
+      return;
+    }
+    if(action.startsWith('sub-')){
+      const sub = sem.subjects.find(s=>s.id===t.dataset.sub);
+      if(!sub) return;
+      if(action==='sub-name'){
+        sub.name = t.value;
+        saveState();
+        return;
+      }
+     
+      if(action==='sub-credits') sub.credits = t.value;
+      if(action==='sub-marks') sub.marks = t.value;
+      if(action==='sub-grade') sub.grade = t.value;
+      refreshDerived(sem.id);
+      saveState();
+    }
+  }
+  semesterList.addEventListener('input', handleFieldChange);
+  
+  semesterList.addEventListener('change', (e)=>{
+    if(e.target.tagName === 'SELECT') handleFieldChange(e);
+  });
+
+  semesterList.addEventListener('click', (e)=>{
+    
+    const t = e.target.closest('button[data-action]');
+    if(!t) return;
+    const action = t.dataset.action;
+
+    if(action==='remove-sem'){
+      const idx = state.semesters.findIndex(s=>s.id===t.dataset.sem);
+      if(idx===-1) return;
+      const [removed] = state.semesters.splice(idx, 1);
+      renderLedger(); updateSidebarSummary(); saveState();
+      showToast(`Removed "${removed.name || 'semester'}"`, {
+        onUndo: ()=>{
+          state.semesters.splice(idx, 0, removed);
+          renderLedger(); updateSidebarSummary(); saveState();
+        }
+      });
+      return;
+    }
+    if(action==='add-sub'){
+      state.semesters.find(s=>s.id===t.dataset.sem).subjects.push(blankSubject());
+    }
+    if(action==='remove-sub'){
+      const sem = state.semesters.find(s=>s.id===t.dataset.sem);
+      const idx = sem.subjects.findIndex(s=>s.id===t.dataset.sub);
+      if(idx===-1) return;
+      const [removed] = sem.subjects.splice(idx, 1);
+      renderLedger(); updateSidebarSummary(); saveState();
+      showToast(`Removed "${removed.name || 'subject'}"`, {
+        onUndo: ()=>{
+          sem.subjects.splice(idx, 0, removed);
+          renderLedger(); updateSidebarSummary(); saveState();
+        }
+      });
+      return;
+    }
+    if(action==='mode'){
+      const sub = state.semesters.find(s=>s.id===t.dataset.sem).subjects.find(s=>s.id===t.dataset.sub);
+      sub.mode = t.dataset.mode;
+    }
+    renderLedger();
+    updateSidebarSummary();
+    saveState();
+  });
+
+  function addSemester(){
+    state.semesters.push({ id:uid(), name:'Semester '+(state.semesters.length+1), subjects:[blankSubject()] });
+    renderLedger(); updateSidebarSummary(); saveState();
+    showToast('Semester added');
+  }
+  document.getElementById('addSemesterBtn').addEventListener('click', addSemester);
+
+  document.getElementById('eraseBtn').addEventListener('click', async ()=>{
+    const ok = await askConfirm('Clear all data?', "This removes every semester and subject you've entered. This can't be undone.", 'Clear everything');
+    if(!ok) return;
+    state.semesters = [];
+    renderLedger(); updateSidebarSummary(); saveState();
+    showToast('All data cleared', {danger:true});
+  });
+
+
+  function updateSidebarSummary(){
+    const o = overallStats();
+    document.getElementById('sideCgpa').textContent = o.cgpa.toFixed(2);
+    document.getElementById('sideMeta').textContent = `${o.credits} credits · ${state.semesters.length} semester${state.semesters.length!==1?'s':''}`;
+  }
+
+  
+  let bannerShown = false;
+  const RING_CIRCUMFERENCE = 440;
+  function renderReport(){
+    const o = overallStats();
+    document.getElementById('cgpaNum').textContent = o.cgpa.toFixed(2);
+    document.getElementById('totalCredits').textContent = o.credits;
+    document.getElementById('totalSemesters').textContent = state.semesters.length;
+    document.getElementById('totalSubjects').textContent = o.subjects;
+
+    const offset = RING_CIRCUMFERENCE - (Math.min(10,o.cgpa)/10)*RING_CIRCUMFERENCE;
+    document.getElementById('ringFg').style.strokeDashoffset = offset;
+
+    const trend = document.getElementById('trendBars');
+    if(state.semesters.length===0){
+      trend.innerHTML = '<div class="empty-state">No semesters yet — add one from the Semesters tab.</div>';
+    }else{
+      trend.innerHTML = state.semesters.map(sem=>{
+        const st = semesterStats(sem);
+        const pct = Math.max(2, Math.min(100, (st.sgpa/10)*100));
+        return `<div class="bar-row">
+          <span class="lbl">${escapeHtml(sem.name)}</span>
+          <span class="bar-track"><span class="bar-fill" style="width:${pct}%"></span></span>
+          <span class="bar-val">${st.sgpa.toFixed(2)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    const banner = document.getElementById('banner');
+    if(o.cgpa >= 9 && !bannerShown){
+      bannerShown = true;
+      banner.classList.add('show');
+    } else if(o.cgpa < 9){
+      bannerShown = false;
+      banner.classList.remove('show');
+    }
+  }
+
+  const targetInput = document.getElementById('targetCgpa');
+  const remInput = document.getElementById('remainingCredits');
+  function renderPlanner(){
+    const o = overallStats();
+    const target = parseFloat(targetInput.value);
+    const remaining = parseFloat(remInput.value);
+    const card = document.getElementById('resultCard');
+
+    let html = `<p class="result-headline">Right now you have <b>${o.cgpa.toFixed(2)}</b> CGPA across <b>${o.credits}</b> credits.</p>`;
+
+    if(isFinite(target) && isFinite(remaining) && remaining > 0){
+      const finalCredits = o.credits + remaining;
+      const pointsNeededTotal = target*finalCredits;
+      const pointsLeft = pointsNeededTotal - o.points;
+      const neededGpa = pointsLeft/remaining;
+
+      html += `
+        <div class="step"><span class="step-num">1</span><div>Total credits when you finish: <b>${o.credits}</b> + <b>${remaining}</b> = <b>${finalCredits}</b></div></div>
+        <div class="step"><span class="step-num">2</span><div>Total grade points needed for ${target.toFixed(2)} CGPA: <b>${target.toFixed(2)}</b> × <b>${finalCredits}</b> = <b>${pointsNeededTotal.toFixed(1)}</b></div></div>
+        <div class="step"><span class="step-num">3</span><div>Points you still need to earn: <b>${pointsNeededTotal.toFixed(1)}</b> − <b>${o.points.toFixed(1)}</b> = <b>${pointsLeft.toFixed(1)}</b></div></div>
+      `;
+
+      let cls, text;
+      if(neededGpa <= 0){
+        cls='ok'; text = `You've already reached this target — even a 0.0 average from here keeps you there.`;
+      } else if(neededGpa <= 7){
+        cls='ok'; text = `That's a comfortable target — keep doing what you're doing.`;
+      } else if(neededGpa <= 10){
+        cls='warn'; text = `That needs solid, consistent performance for the rest of your semesters.`;
+      } else {
+        cls='bad'; text = `Not reachable — no grade point average can exceed 10.0.`;
+      }
+      html += `
+        <div class="verdict-box ${cls}">
+          <div class="verdict-num">${Math.max(0,Math.min(10,neededGpa)).toFixed(2)}</div>
+          <div class="verdict-text"><b>GPA needed from here on.</b><br>${text}</div>
+        </div>
+      `;
+    } else {
+      html += `<div class="empty-state">Enter a target CGPA and your remaining credits to see what you need.</div>`;
+    }
+    card.innerHTML = html;
+  }
+  targetInput.addEventListener('input', renderPlanner);
+  remInput.addEventListener('input', renderPlanner);
+
+  
+  document.getElementById('scaleGrid').innerHTML = GRADES.map(r=>`
+    <div class="scale-tile">
+      <div class="tile-top">
+        <div class="letter" style="color:${r.color};">${r.g}</div>
+        <div class="marks">${r.min}–${r.max} marks</div>
+      </div>
+      <div class="tile-bottom" style="background:${r.color};">${r.pt} <span class="pt-num"></span>grade point${r.pt===1?'':'s'}</div>
+    </div>
+  `).join('');
+
+  function renderAll(){
+    renderLedger();
+    renderReport();
+    renderPlanner();
+    updateSidebarSummary();
+  }
+
+  loadState();
+})();
+</script>
+</body>
+</html>
